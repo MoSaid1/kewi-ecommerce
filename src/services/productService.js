@@ -1,96 +1,59 @@
-// Dependencies are loaded via sequential script tags
+/**
+ * productService.js
+ * All data is now stored in MySQL via the PHP API.
+ * Methods return Promises when writing, and use an in-memory cache for reads.
+ */
 
-const STORAGE_KEY = 'kewi_products_v3';
+const productService = (() => {
+    let _cache = [];
 
-const productService = {
-    /**
-     * Get all products. Initializes with default seed data if empty.
-     */
-    getAllProducts: () => {
+    // Load all products from server into memory cache
+    const loadAll = async () => {
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                return JSON.parse(stored);
-            } else {
-                // Initialize default database
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(initialProducts));
-                return initialProducts;
-            }
-        } catch (error) {
-            console.error("Error reading products from localStorage:", error);
-            return [];
+            _cache = await window.kewiApi.getAllProducts();
+        } catch (e) {
+            console.error('productService: failed to load products', e);
+            _cache = [];
         }
-    },
+        return _cache;
+    };
 
-    /**
-     * Fetch a specific product by its exact string ID
-     */
-    getProductById: (id) => {
-        const products = productService.getAllProducts();
-        return products.find(p => p.id === id) || null;
-    },
+    // ── Sync reads from cache ────────────────────────────────
+    const getAllProducts = () => _cache;
 
-    /**
-     * Get products in a specific category (case insensitive match)
-     */
-    getProductsByCategory: (categoryName) => {
-        const products = productService.getAllProducts();
-        return products.filter(p => p.category.toLowerCase() === categoryName.toLowerCase());
-    },
+    const getProductById = (id) => _cache.find(p => p.id === id) || null;
 
-    /**
-     * Create a new product object and prepend it to the list
-     */
-    createProduct: (productData) => {
-        const products = productService.getAllProducts();
-        // Generate a simple unique ID if none provided
-        const newProduct = {
-            ...productData,
-            id: productData.id || `prod-${Date.now()}`
-        };
-        const updatedProducts = [newProduct, ...products];
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
-            return newProduct;
-        } catch (error) {
-            console.error("Error saving new product to localStorage:", error);
-            throw error; // Bubble up for UI toasts
-        }
-    },
+    const getProductsByCategory = (cat) =>
+        _cache.filter(p => p.category?.toLowerCase() === cat?.toLowerCase());
 
-    /**
-     * Full replace update for a specific product ID
-     */
-    updateProduct: (id, updatedData) => {
-        const products = productService.getAllProducts();
-        const index = products.findIndex(p => p.id === id);
-        if (index !== -1) {
-            products[index] = { ...products[index], ...updatedData };
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-                return products[index];
-            } catch (error) {
-                console.error("Error updating product in localStorage:", error);
-                throw error;
-            }
-        }
-        return null;
-    },
+    // ── Async writes → API → refresh cache ──────────────────
+    const createProduct = async (data) => {
+        const result = await window.kewiApi.createProduct(data);
+        await loadAll();
+        return result;
+    };
 
-    /**
-     * Deletes a product from the array by ID
-     */
-    deleteProduct: (id) => {
-        const products = productService.getAllProducts();
-        const updatedProducts = products.filter(p => p.id !== id);
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
-            return true;
-        } catch (error) {
-            console.error("Error deleting product from localStorage:", error);
-            throw error;
-        }
-    }
-};
+    const updateProduct = async (id, data) => {
+        const result = await window.kewiApi.updateProduct(id, data);
+        await loadAll();
+        return result;
+    };
+
+    const deleteProduct = async (id) => {
+        const result = await window.kewiApi.deleteProduct(id);
+        await loadAll();
+        return result;
+    };
+
+    return {
+        loadAll,
+        getAllProducts,
+        getProductById,
+        getProductsByCategory,
+        createProduct,
+        updateProduct,
+        deleteProduct,
+    };
+})();
 
 window.productService = productService;

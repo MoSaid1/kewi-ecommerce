@@ -135,6 +135,13 @@ const App = () => {
         }
     }, [heroSlides]);
 
+    // Load products from MySQL API on startup
+    useEffect(() => {
+        if (window.productService && window.productService.loadAll) {
+            window.productService.loadAll();
+        }
+    }, []);
+
     // Save settings to LocalStorage
     useEffect(() => {
         try {

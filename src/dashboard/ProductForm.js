@@ -109,7 +109,7 @@ const ProductForm = ({ language, t, initialProduct, onSave, onCancel, categories
     // Note: To keep things simple without complex color pickers, adding colors is simplified
     // In a full app this would be a detailed sub-form. We will mock a simple comma string approach for now.
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Clean data before saving
@@ -135,14 +135,15 @@ const ProductForm = ({ language, t, initialProduct, onSave, onCancel, categories
 
         try {
             if (isEditMode) {
-                productService.updateProduct(finalData.id, finalData);
+                await productService.updateProduct(finalData.id, finalData);
             } else {
-                productService.createProduct(finalData);
+                await productService.createProduct(finalData);
             }
             if (window.alert) window.alert(language === 'ar' ? 'تم الحفظ بنجاح!' : 'Saved successfully!');
             onSave();
         } catch (error) {
-            if (window.alert) window.alert(language === 'ar' ? 'حدث خطأ أثناء الحفظ.' : 'Error saving product.');
+            console.error('Save error:', error);
+            if (window.alert) window.alert(language === 'ar' ? 'حدث خطأ أثناء الحفظ: ' + error.message : 'Error saving product: ' + error.message);
         }
     };
 
