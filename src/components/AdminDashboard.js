@@ -154,23 +154,35 @@ const AdminDashboard = ({ t, language, heroSlides, setHeroSlides, siteSettings, 
     };
 
     // --- Category Handlers ---
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
         if (!newCategory.titleAr || !newCategory.titleEn || !newCategory.image) {
             setToastMsg(language === 'ar' ? '⚠️ يرجى تعبئة الحقول الأساسية (الاسم والصورة)' : '⚠️ Please fill required fields (Name & Image)');
             setTimeout(() => setToastMsg(''), 3000);
             return;
         }
-        const updatedCategories = [...(categories || []), { ...newCategory, id: Date.now() }];
-        setCategories(updatedCategories);
-        setNewCategory({ image: '', titleAr: '', titleEn: '', link: '#' });
-        showToast();
+        try {
+            await window.kewiApi.createCategory({
+                titleAr: newCategory.titleAr,
+                titleEn: newCategory.titleEn,
+                image: newCategory.image,
+                link: newCategory.link || '#',
+                sort_order: (categories || []).length
+            });
+            const fresh = await window.kewiApi.getCategories();
+            setCategories(fresh);
+            setNewCategory({ image: '', titleAr: '', titleEn: '', link: '#' });
+            showToast();
+        } catch (err) {
+            setToastMsg('⚠️ خطأ في الحفظ: ' + err.message);
+            setTimeout(() => setToastMsg(''), 3000);
+        }
     };
 
     const requestRemoveCategory = (index) => {
         setDeletePrompt({ isOpen: true, type: 'category', index });
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (deletePrompt.type === 'slide') {
             const currentCountrySlides = heroSlides[editingCountry] || [];
             const updatedCountrySlides = currentCountrySlides.filter((_, i) => i !== deletePrompt.index);
@@ -178,9 +190,18 @@ const AdminDashboard = ({ t, language, heroSlides, setHeroSlides, siteSettings, 
             setHeroSlides({ ...safeHeroSlides, [editingCountry]: updatedCountrySlides });
             showToast();
         } else if (deletePrompt.type === 'category') {
-            const updated = (categories || []).filter((_, i) => i !== deletePrompt.index);
-            setCategories(updated);
-            showToast();
+            const cat = (categories || [])[deletePrompt.index];
+            if (cat && cat.id) {
+                try {
+                    await window.kewiApi.deleteCategory(cat.id);
+                    const fresh = await window.kewiApi.getCategories();
+                    setCategories(fresh);
+                    showToast();
+                } catch (err) {
+                    setToastMsg('⚠️ خطأ في الحذف: ' + err.message);
+                    setTimeout(() => setToastMsg(''), 3000);
+                }
+            }
         }
         setDeletePrompt({ isOpen: false, type: null, index: null });
     };
@@ -199,10 +220,25 @@ const AdminDashboard = ({ t, language, heroSlides, setHeroSlides, siteSettings, 
         showToast();
     };
 
-    const updateExistingCategory = (index, key, value) => {
+    const updateExistingCategory = async (index, key, value) => {
         const updated = [...(categories || [])];
         updated[index] = { ...updated[index], [key]: value };
-        setCategories(updated);
+        setCategories(updated); // optimistic update
+        // Persist to MySQL
+        const cat = updated[index];
+        if (cat && cat.id) {
+            try {
+                await window.kewiApi.updateCategory(cat.id, {
+                    titleAr: cat.titleAr,
+                    titleEn: cat.titleEn,
+                    image: cat.image,
+                    link: cat.link || '#',
+                    sort_order: cat.sort_order || index
+                });
+            } catch (err) {
+                console.error('Category update error:', err);
+            }
+        }
     };
 
     const handleCategoryFileUpload = (e, isNew, indexForExisting = null) => {
