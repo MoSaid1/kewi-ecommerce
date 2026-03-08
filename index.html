@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kewi | Women's Fashion Online Store (React Version)</title>
+    <!-- Fonts and Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css?v=5">
+
+    <!-- React & ReactDOM (Development versions for CDN usage) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel standalone for in-browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <!-- React mounts here -->
+    <div id="root"></div>
+
+    <!-- Load scripts and mock data before components -->
+    <script src="script.js?v=4"></script>
+
+    <!-- Load React Components (JSX must be compiled by babel) -->
+    <script type="text/babel" src="src/components/TopBar.js?v=4"></script>
+    <script type="text/babel" src="src/components/Header.js?v=4"></script>
+    <script type="text/babel" src="src/components/Hero.js?v=10"></script>
+    <script type="text/babel" src="src/components/Categories.js?v=25"></script>
+    <script type="text/babel" src="src/components/FlashSale.js?v=25"></script>
+    <script type="text/babel" src="src/components/Recommended.js?v=25"></script>
+    <script type="text/babel" src="src/components/Collections.js?v=25"></script>
+    <script type="text/babel" src="src/components/PromoBanner.js?v=25"></script>
+    <script type="text/babel" src="src/components/BestSellers.js?v=25"></script>
+    <!-- Data and Services -->
+    <script src="src/data/products.js?v=25"></script>
+    <script src="src/services/api.js?v=1"></script>
+    <script src="src/services/productService.js?v=25"></script>
+
+    <!-- Project Components -->
+    <script type="text/babel" src="src/components/ColorSelector.js?v=25"></script>
+    <script type="text/babel" src="src/components/SizeSelector.js?v=25"></script>
+    <script type="text/babel" src="src/components/ProductGallery.js?v=25"></script>
+    <script type="text/babel" src="src/components/ProductInfo.js?v=25"></script>
+    <script type="text/babel" src="src/components/ProductCard.js?v=25"></script>
+    <script type="text/babel" src="src/components/BagsSection.js?v=25"></script>
+
+    <!-- Pages -->
+    <script type="text/babel" src="src/pages/HomePage.js?v=25"></script>
+    <script type="text/babel" src="src/pages/ProductPage.js?v=25"></script>
+
+    <!-- Existing Structural UI -->
+    <script type="text/babel" src="src/components/Footer.js?v=25"></script>
+
+    <script type="text/babel" src="src/dashboard/ProductList.js?v=25"></script>
+    <script type="text/babel" src="src/dashboard/ProductForm.js?v=25"></script>
+    <script type="text/babel" src="src/components/AdminDashboard.js?v=25"></script>
+
+    <!-- Load Main App Component -->
+    <script type="text/babel" src="src/App.js?v=25"></script>
+</body>
+
+</html>

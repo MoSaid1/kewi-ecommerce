@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Babel Debug Test</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Babel for in-browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        Babel.registerPreset("react", window.Babel.availablePresets["react"]);
+        window.addEventListener('error', (e) => {
+            console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel" src="src/components/AdminDashboard.js" data-type="module"></script>
+    <script>
+        setTimeout(() => {
+            console.log("Babel parse completed (or failed silenty)");
+        }, 3000);
+    </script>
+</body>
+
+</html>
